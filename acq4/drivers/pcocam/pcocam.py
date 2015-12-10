@@ -87,7 +87,7 @@ class PCODriverClass:
     def call(self, function, *args):
         a = function(*args)
         #print function, a, a()
-        print hex(a())
+        #print hex(a())
         if a() == None:
             return a
         elif a() != 0:
@@ -116,7 +116,11 @@ class PCOCameraClass:
 		self.pcocam = pcocam
 		self.isOpen = False
 		self.open()
-		self.call(LIB.GetSize,self.cameraHandle,byref(size[0]),byref(size[1]),byref(size[2]),byref(size[3]))
+		xresAct = c_ushort(0)
+		yresAct = c_ushort(0)
+		xresMax = c_ushort(0)
+		yresMax = c_ushort(0)
+		self.call(LIB.GetSizes,self.cameraHandle,byref(xresAct),byref(yresAct),byref(xresMax),byref(yresMax))
 		''' GetSize Get the actual armed image sizes of the camera
 		Prototype : SC2_SDK_FUNC int WINAPI PCO_GetSizes(HANDLE ph, WORD* wXResAct, WORD* wYResAct, WORD* wXResMax, WORD* wYResMax)
 		Input parameter:
@@ -128,25 +132,26 @@ class PCOCameraClass:
 		Return value:
 		• int: Error message, 0 in case of success else less than 0: see Error / Warning Codes
 		'''
-		print size.value
+		print xresAct.value, yresAct.value, xresMax.value, yresMax.value
 		self.paramValues = {}   ## storage for local params and cache for remote params
 		## remote params must be cached because reading them can cause
 		## the camera to stop.
-		self.paramValues = {  ## list of current values for parameters not handled by driver
-		'binningX': 1,
-		'binningY': 1,
-		'exposure': 0.001,
-		'framerate': 1,
-		'pixelrate': 1,			
-		'TriggerMode': 0,
-		'triggerMode': 'Normal',
-		'regionX': 0,
-		'regionY': 0, 
-		'ActualresX': size[0],
-		'ActualresY': size[1],
-		'MaxresX': size[2],
-		'MaxresY': size[3],
-		}
+		#self.paramValues = {  ## list of current values for parameters not handled by driver
+		#'binningX': 1,
+		#'binningY': 1,
+		#'exposure': 0.001,
+		#'framerate': 1,
+		#'pixelrate': 1,			
+		#'TriggerMode': 0,
+		#'triggerMode': 'Normal',
+		#'regionX': 0,
+		#'regionY': 0, 
+		#'ActualresX': size[0],
+		#'ActualresY': size[1],
+		#'MaxresX': size[2],
+		#'MaxresY': size[3],
+		#}
+		self.list_Params()
 
 
 	def open(self):
@@ -170,13 +175,16 @@ class PCOCameraClass:
 
 	def list_Params(self, params=None):
 		print 'LIST...'
-		if params is None:
-			return self.paramValues.copy()
+		#if params is None:
+		#	return self.paramValues.copy()
 
 		# Description of the camera
-		self.call(LIB.getCameraDescription,self.cameraHandle,byref(plist))
+		plist = LIB.Description(sizeof(LIB.Description),)
+		print "CAMERA DESCRIPTION : %s" % plist.wMaxBinVertDESC
+		self.call(LIB.GetCameraDescription,self.cameraHandle,byref(plist))
 		# Get the Binning on the X and Y axis
-		print "CAMERA DESCRIPTION : %s" % plist
+		#
+		print "CAMERA DESCRIPTION : %s" % plist.wMaxBinVertDESC
 		
 		'''
 		
