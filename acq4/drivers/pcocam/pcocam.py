@@ -239,7 +239,7 @@ class PCOCameraClass:
 		#
 		self.call(LIB.GetBinning,self.cameraHandle,byref(plist.wBinHorz),byref(plist.wBinVert))
 		self.call(LIB.SetBinning,self.cameraHandle,byref(plist.wBinHorz),byref(plist.wBinVert))
-		self.call(LIB.GetPixelrate,self.cameraHandle,byref(plist.wBinHorz),byref(plist.wBinVert))
+		self.call(LIB.GetPixelrate,self.cameraHandle,byref(plist.wBinHorz))
 		self.call(LIB.SetPixelrate,self.cameraHandle,byref(dwPixelRate))
 		
 		
@@ -282,10 +282,10 @@ class PCOCameraClass:
 
 	def start_camera(self,camHand):
 		act_recState = c_ushort(10)
-		res1 = LIB.PCO_GetRecordingState(camHand,byref(act_recState))
+		res1 = LIB.GetRecordingState(camHand,byref(act_recState))
 		if res1():
 			print 'PCO_GetRecordingState failed %08X ' % res1
-			LIB.PCO_GetErrorText(res1)
+			LIB.GetErrorText(res1)
 	
 		if act_recState.value != 1:
 			res1 = LIB.PCO_SetRecordingState(camHand,1)
@@ -294,13 +294,13 @@ class PCOCameraClass:
 
 	def stop_camera(self,camHand):
 		act_recState = c_ushort(10)
-		res1 = LIB.PCO_GetRecordingState(camHand,byref(act_recState))
+		res1 = LIB.GetRecordingState(camHand,byref(act_recState))
 		if res1():
-			print 'PCO_GetRecordingState failed '
-			LIB.PCO_GetErrorText(res1)
+			print 'GetRecordingState failed '
+			LIB.GetErrorText(res1)
 	
 		if act_recState.value != 0:
-			res1 = LIB.PCO_SetRecordingState(camHand,0)
+			res1 = LIB.SetRecordingState(camHand,0)
 			print 'RecordingState set to 0'
 
 
@@ -310,7 +310,7 @@ class PCOCameraClass:
 		del_base = c_ushort(0)
 		exp_base = c_ushort(0)
 		
-		res1 = LIB.PCO_GetDelayExposureTime(camHand,byref(del_time),byref(exp_time),byref(del_base),byref(exp_base))
+		res1 = LIB.GetDelayExposureTime(camHand,byref(del_time),byref(exp_time),byref(del_base),byref(exp_base))
 		
 		if res1():
 			print 'PCO_GetDelayExposureTime failed'
