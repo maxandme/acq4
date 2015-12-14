@@ -152,6 +152,7 @@ class PCOCameraClass:
 		#'MaxresY': size[3],
 		#}
 		self.list_Params()
+		set_Params()
 
 
 	def open(self):
@@ -184,7 +185,11 @@ class PCOCameraClass:
 		self.call(LIB.GetCameraDescription,self.cameraHandle,byref(plist))
 		# Get the Binning on the X and Y axis
 		#
-		print "CAMERA DESCRIPTION : %s" % plist.wMaxBinVertDESC
+		print "MAXIMUM BINNING VERTICAL : %s" % plist.wMaxBinVertDESC
+		print "MAXIMUM BINNING HORIZONTAL : %s" % plist.wMaxBinVertDESC
+		print "ACTUAL BINNING VERTICAL : %s" % plist.wBinVertSteppingDESC
+		print "ACTUAL BINNING HORIZONTAL : %s" % plist.wBinHorzSteppingDESC
+		print ""
 		
 		'''
 		
@@ -226,21 +231,18 @@ class PCOCameraClass:
 			print params,'=',self.params[params]
 
 	def set_Params(self,exposure_time,time_stamp,pixelrate,trigger_mode,hor_bin,vert_bin):
-		self.set_Params = 1
-		self.call(LIB.SetBinning,cameraHandle,byref(self.paramValues['binningX']),byref(self.paramValues['binningY']))
-		if exposure_time:
-			self.params['exposure_time'] = exposure_time
-		if time_stamp:
-			self.params['time_stamp'] = time_stamp
-		if pixelrate:
-			self.params['pixelrate'] = pixelrate
-		if trigger_mode:
-			self.params['trigger_mode'] = trigger_mode
-		if hor_bin:
-			self.params['hor_bin'] = hor_bin
-		if vert_bin:
-			self.params['vert_bin'] = vert_bin
-		self.list_Params()
+		print 'SET_PARAM..'
+		
+		plist = LIB.Description(sizeof(LIB.Description),)
+		self.call(LIB.GetCameraDescription,self.cameraHandle,byref(plist))
+		# Get the Binning on the X and Y axis
+		#
+		yresMax = c_ushort(0)
+		self.call(LIB.GetBinning,self.cameraHandle,byref(plist.wBinHorz),byref(plist.wBinVert))
+		self.call(LIB.SetBinning,self.cameraHandle,byref(plist.wBinHorz),byref(plist.wBinVert))
+		
+		
+		
 		
 
 
