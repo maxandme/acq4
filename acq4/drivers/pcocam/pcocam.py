@@ -233,13 +233,14 @@ class PCOCameraClass:
 	def set_Params(self,exposure_time,time_stamp,pixelrate,trigger_mode,hor_bin,vert_bin):
 		print 'SET_PARAM..'
 		
-		plist = LIB.Description(sizeof(LIB.Description),)
+		plist = LIB.Sensor(sizeof(LIB.Sensor),)
 		self.call(LIB.GetCameraDescription,self.cameraHandle,byref(plist))
 		# Get the Binning on the X and Y axis
 		#
-		yresMax = c_ushort(0)
 		self.call(LIB.GetBinning,self.cameraHandle,byref(plist.wBinHorz),byref(plist.wBinVert))
 		self.call(LIB.SetBinning,self.cameraHandle,byref(plist.wBinHorz),byref(plist.wBinVert))
+		self.call(LIB.GetPixelrate,self.cameraHandle,byref(plist.wBinHorz),byref(plist.wBinVert))
+		self.call(LIB.SetPixelrate,self.cameraHandle,byref(dwPixelRate))
 		
 		
 		
