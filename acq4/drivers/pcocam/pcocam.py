@@ -39,18 +39,18 @@ LIB = CLibrary(windll.SC2_Cam, HEADERS, prefix='PCO_') ##makes it so that functi
 
 
 externalParams = [	'binningY',
-					'binningX',
-					'exposure',
-					'framerate',
-					'pixelrate',			
-					'TriggerMode',
-					'triggerMode',
-					'regionX',
-					'regionY', 
-					'ActualresX',
-					'ActualresY',
-					'MaxresX',
-					'MaxresY'
+                    'binningX',
+                    'exposure',
+                    'framerate',
+                    'pixelrate',
+                    'TriggerMode',
+                    'triggerMode',
+                    'regionX',
+                    'regionY', 
+                    'ActualresX',
+                    'ActualresY',
+                    'MaxresX',
+                    'MaxresY'
                   ]
 
 
@@ -111,143 +111,119 @@ class PCODriverClass:
             self.cam[c].quit()
             
 class PCOCameraClass:
-	def __init__(self,name,pcocam):
-		self.name = name
-		self.pcocam = pcocam
-		self.isOpen = False
-		self.open()
-		xresAct = c_ushort(0)
-		yresAct = c_ushort(0)
-		xresMax = c_ushort(0)
-		yresMax = c_ushort(0)
-		self.call(LIB.GetSizes,self.cameraHandle,byref(xresAct),byref(yresAct),byref(xresMax),byref(yresMax))
-		''' GetSize Get the actual armed image sizes of the camera
-		Prototype : SC2_SDK_FUNC int WINAPI PCO_GetSizes(HANDLE ph, WORD* wXResAct, WORD* wYResAct, WORD* wXResMax, WORD* wYResMax)
-		Input parameter:
-		• HANDLE ph: Handle to a previously opened camera device.
-		• WORD* wXResAct: Address of a WORD to get the actual x resolution.
-		• WORD* wYResAct: Address of a WORD to get the actual y resolution.
-		• WORD* wXResMax: Address of a WORD to get the maximum x resolution.
-		• WORD* wXResMax: Address of a WORD to get the maximum y resolution.
-		Return value:
-		• int: Error message, 0 in case of success else less than 0: see Error / Warning Codes
-		'''
-		print xresAct.value, yresAct.value, xresMax.value, yresMax.value
-		self.paramValues = {}   ## storage for local params and cache for remote params
-		## remote params must be cached because reading them can cause
-		## the camera to stop.
-		#self.paramValues = {  ## list of current values for parameters not handled by driver
-		#'binningX': 1,
-		#'binningY': 1,
-		#'exposure': 0.001,
-		#'framerate': 1,
-		#'pixelrate': 1,			
-		#'TriggerMode': 0,
-		#'triggerMode': 'Normal',
-		#'regionX': 0,
-		#'regionY': 0, 
-		#'ActualresX': size[0],
-		#'ActualresY': size[1],
-		#'MaxresX': size[2],
-		#'MaxresY': size[3],
-		#}
-		self.list_Params()
-		set_Params()
+    def __init__(self,name,pcocam):
+        self.name = name
+        self.pcocam = pcocam
+        self.isOpen = False
+        self.open()
+        xresAct = c_ushort(0)
+        yresAct = c_ushort(0)
+        xresMax = c_ushort(0)
+        yresMax = c_ushort(0)
+        self.call(LIB.GetSizes,self.cameraHandle,byref(xresAct),byref(yresAct),byref(xresMax),byref(yresMax))
+        ''' GetSize Get the actual armed image sizes of the camera
+        Prototype : SC2_SDK_FUNC int WINAPI PCO_GetSizes(HANDLE ph, WORD* wXResAct, WORD* wYResAct, WORD* wXResMax, WORD* wYResMax)
+        Input parameter:
+        • HANDLE ph: Handle to a previously opened camera device.
+        • WORD* wXResAct: Address of a WORD to get the actual x resolution.
+        • WORD* wYResAct: Address of a WORD to get the actual y resolution.
+        • WORD* wXResMax: Address of a WORD to get the maximum x resolution.
+        • WORD* wXResMax: Address of a WORD to get the maximum y resolution.
+        Return value:
+        • int: Error message, 0 in case of success else less than 0: see Error / Warning Codes
+        '''
+        print 'GET SIZE ...'
+        print 'ACTUAL RESOLUTION : %s x %s' % (xresAct.value, yresAct.value)
+        print 'MAXIMUM RESOLUTION : %s x %s' % (xresMax.value, yresMax.value)
+        self.paramValues = {}   ## storage for local params and cache for remote params
+        ## remote params must be cached because reading them can cause
+        ## the camera to stop.
+        #self.paramValues = {  ## list of current values for parameters not handled by driver
+        #'binningX': 1,
+        #'binningY': 1,
+        #'exposure': 0.001,
+        #'framerate': 1,
+        #'pixelrate': 1,			
+        #'TriggerMode': 0,
+        #'triggerMode': 'Normal',
+        #'regionX': 0,
+        #'regionY': 0, 
+        #'ActualresX': size[0],
+        #'ActualresY': size[1],
+        #'MaxresX': size[2],
+        #'MaxresY': size[3],
+        #}
+        self.list_Params()
+        #self.set_Params()
+
+    def open(self):
+        self.cameraHandle = c_void_p()
+        self.call(LIB.OpenCamera,byref(self.cameraHandle),0)
+        self.isOpen  = True
+        print "    camera open...."
+    def __del__(self):
+        self.close()
 
 
-	def open(self):
-		self.cameraHandle = c_void_p()
-		self.call(LIB.OpenCamera,byref(self.cameraHandle),0)
-		self.isOpen  = True
-		print "    camera open...."
+    def close(self):
+        if self.isOpen:
+            self.call(LIB.CloseCamera,self.cameraHandle)
+            self.isOpen = False
+            print 'camera closed...'
 
-	def __del__(self):
-		self.close()
+    def call(self, function, *args):
+        return self.pcocam.call(function, *args)
+    
+    def list_Params(self, params=None):
+        sensor_format=""
+        print 'LIST...'
+        #if params is None:
+        #	return self.paramValues.copy()
+        print 'Description of the camera'
+        plist = LIB.Description(sizeof(LIB.Description),)
+        self.call(LIB.GetCameraDescription,self.cameraHandle,byref(plist))
+        print 'done'
+        print ''
+        print 'Description of the sensor'
+        slist = LIB.Sensor(sizeof(LIB.Sensor),)
+        self.call(LIB.GetSensorStruct,self.cameraHandle,byref(slist))
+        print ''
+        if slist.wSensorformat == 0 :
+            sensor_format="STANDARD"
+        elif slist.wSensorformat == 1 :
+            sensor_format="EXTENDED"
+        print "Sensor Format : %s" % sensor_format
+        print ''
+        print "PIXELRATE : %s" % slist.dwPixelRate
+        print ""
+        print "BINNING ..."
+        print "BINNING VERTICAL : %s" % slist.wBinHorz
+        print "BINNING HORIZONTAL : %s" % slist.wBinVert
+        print ""
+        print "Region of interest : ROI "
+        print "HORIZONTAL ROI X0 : %s" % slist.wRoiX0
+        print "VERTICAL ROI Y0: %s" % slist.wRoiY0
+        print "HORIZONTAL ROI X1: %s" % slist.wRoiX1
+        print "VERTICAL ROI Y1: %s" % slist.wRoiY1
+        self.call(LIB.SetSensorStruct,self.cameraHandle,byref(slist))
+        print ""
+    
+    def set_Params(self,exposure_time,time_stamp,pixelrate,trigger_mode,hor_bin,vert_bin):
+        print 'SET_PARAM..'
+        plist = LIB.Sensor(sizeof(LIB.Sensor),)
+        self.call(LIB.SetSensorStruct,self.cameraHandle,byref(plist))
+        # Get the Binning on the X and Y axis
 
+       
 
-	def close(self):
-		if self.isOpen:
-			self.call(LIB.CloseCamera,self.cameraHandle)
-			self.isOpen = False
-			print 'camera closed...'
+      
 
-	def call(self, function, *args):
-		return self.pcocam.call(function, *args)
+     
 
-	def list_Params(self, params=None):
-		print 'LIST...'
-		#if params is None:
-		#	return self.paramValues.copy()
+    
 
-		# Description of the camera
-		plist = LIB.Description(sizeof(LIB.Description),)
-		
-		self.call(LIB.GetCameraDescription,self.cameraHandle,byref(plist))
-		# Get the Binning on the X and Y axis
-		#
-		print "MAXIMUM BINNING VERTICAL : %s" % plist.wMaxBinVertDESC
-		print "MAXIMUM BINNING HORIZONTAL : %s" % plist.wMaxBinVertDESC
-		print "ACTUAL BINNING VERTICAL : %s" % plist.wBinVertSteppingDESC
-		print "ACTUAL BINNING HORIZONTAL : %s" % plist.wBinHorzSteppingDESC
-		print ""
-		
-		'''
-		
-		self.call(LIB.GetBinning,cameraHandle,byref(self.paramValues['binningX']),byref(self.paramValues['binningY']))
-		# Get the Pixelrate
-		self.call(LIB.GetPixelrate,cameraHandle,byref(self.paramValues['Pixelrate']))
-		# Get the TriggerMode
-		self.call(LIB.GetTriggerMode,cameraHandle,byref(self.paramValues['TriggerMode']))
-		# Get the Delay/Exposure Time
-		self.call(LIB.GetDelayExposureTime,cameraHandle,byref(self.paramValues['Delay']),byref(self.paramValues['exposure']),byref(self.paramValues['Delaytimebase']),byref(self.paramValues['exposuretimebase']))
-		# Get the FrameRate
-		self.call(LIB.GetGetFrameRate,cameraHandle,byref(self.paramValues['frameratestatus']),byref(self.paramValues['framerate']),byref(self.paramValues['exposure']),byref(self.paramValues['exposuretimebase']))
-		
-		'''
-		
-		
-		for i in self.paramValues:
-			print i , self.paramValues[i]
-
-		print "\n"
-
-		
-		for i in paramValues:
-			print self.paramValues[""]
-			print self.paramValues[i]
-		
-		print 'Parameters are :'
-		print self.paramValues[binningX]
-		print self.paramValues[binningY]
-		print 'exposure_time=',self.params['exposure_time']
-		print 'time_stamp=',self.params['time_stamp']
-		print 'pixelrate=',self.params['pixelrate']
-		print 'trigger_mode=',self.params['trigger_mode']
-		print 'hor_bin=',self.params['hor_bin']
-		print 'vert_bin=',self.params['vert_bin'],'\n'
-
-		
-		if params in self.params:
-			print params,'=',self.params[params]
-
-	def set_Params(self,exposure_time,time_stamp,pixelrate,trigger_mode,hor_bin,vert_bin):
-		print 'SET_PARAM..'
-		
-		plist = LIB.Sensor(sizeof(LIB.Sensor),)
-		self.call(LIB.GetCameraDescription,self.cameraHandle,byref(plist))
-		# Get the Binning on the X and Y axis
-		#
-		self.call(LIB.GetBinning,self.cameraHandle,byref(plist.wBinHorz),byref(plist.wBinVert))
-		self.call(LIB.SetBinning,self.cameraHandle,byref(plist.wBinHorz),byref(plist.wBinVert))
-		self.call(LIB.GetPixelrate,self.cameraHandle,byref(plist.wBinHorz))
-		self.call(LIB.SetPixelrate,self.cameraHandle,byref(dwPixelRate))
-		
-		
-		
-		
-
-
-
+   
+   
 	def setup_camera(self,exposure_time=50,time_stamp=1,pixelrate=1,trigger_mode=0,hor_bin=1,vert_bin=1):
 		print '*******SETUP CAMERA*******'
 		if self.glvar['camera_open'] == 0:
