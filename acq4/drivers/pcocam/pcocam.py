@@ -321,21 +321,21 @@ class PCOCameraClass:
 		exp_time = c_uint(time)
 		exp_base = c_ushort(2)
 		
-		res2 = LIB.PCO_SetDelayExposureTime(camHand,del_time,exp_time,del_base,exp_base)
+		res2 = LIB.SetDelayExposureTime(camHand,del_time,exp_time,del_base,exp_base)
 		if res2():
 			print 'PCO_SetDelayExposureTime failed'
 
 
 	def enable_timestamp(self,camHand,Stamp):
 		act_recState = c_ushort(10)
-		res1 = LIB.PCO_GetRecordingState(camHand,byref(act_recState))
+		res1 = LIB.GetRecordingState(camHand,byref(act_recState))
 		if res1():
-			print 'PCO_GetRecordingState failed '
+			print 'GetRecordingState failed '
 	
 		if act_recState.value != 0:
-			res2 = LIB.PCO_SetRecordingState(camHand,0)
+			res2 = LIB.SetRecordingState(camHand,0)
 			if res2():
-				print 'PCO_SetRecordingState failed '
+				print 'SetRecordingState failed '
 			else:
 				print 'RecordingState set to 0'
 		
@@ -349,31 +349,31 @@ class PCOCameraClass:
 			print 'Stamp must be 0 or 1 or 2!'
 			return
 		
-		res2 = LIB.PCO_SetTimestampMode(camHand,Stamp)
+		res2 = LIB.SetTimestampMode(camHand,Stamp)
 		if res2():
-			print 'PCO_GetRecordingState failed'
+			print 'GetRecordingState failed'
 		
 		if act_recState.value != 0:
-			res4 = LIB.PCO_SetRecordingState(camHand,act_recState)
+			res4 = LIB.SetRecordingState(camHand,act_recState)
 			if res4():
-				print 'PCO_SetRecordingState failed'
+				print 'SetRecordingState failed'
 
 
 	def set_pixelrate(self,camHand,Rate):
 		act_recState = c_ushort(10)
-		res1 = LIB.PCO_GetRecordingState(camHand,byref(act_recState))
+		res1 = LIB.GetRecordingState(camHand,byref(act_recState))
 		if res1():
-			print 'PCO_GetRecordingState failed'
+			print 'GetRecordingState failed'
 	
 		if act_recState.value != 0:
-			res2 = LIB.PCO_SetRecordingState(camHand,0)
+			res2 = LIB.SetRecordingState(camHand,0)
 			print 'RecordingState set to 0'
 		
-		cam_desc = LIB.PCO_Description(436,)		
+		cam_desc = LIB.Description(436,)		
 		#print self.cam_desc.wSize, self.cam_desc.wSensorTypeDESC
-		res3 = LIB.PCO_GetCameraDescription(camHand,byref(cam_desc))
+		res3 = LIB.GetCameraDescription(camHand,byref(cam_desc))
 		if res3():
-			print 'PCO_GetCameraDescription failed with error %08X' % res4
+			print 'GetCameraDescription failed with error %08X' % res4
 		#bitpix = uint16(cam_desc.wDynResDESC)
 		
 		if Rate!=0 and Rate!= 1:
@@ -381,34 +381,34 @@ class PCOCameraClass:
 			
 		#print cam_desc.dwPixelRateDESC[0], cam_desc.dwPixelRateDESC[1]
 		if cam_desc.dwPixelRateDESC[Rate]:
-			res4 = LIB.PCO_SetPixelRate(camHand,cam_desc.dwPixelRateDESC[Rate])
+			res4 = LIB.SetPixelRate(camHand,cam_desc.dwPixelRateDESC[Rate])
 			if res4():
-				print 'PCO_SetPixelRate failed'
+				print 'SetPixelRate failed'
 		
 		print 'Pixelrate is  : ',cam_desc.dwPixelRateDESC[Rate]/1000000.,' MHz'
 		
 		if act_recState.value != 0:
-			res4 = LIB.PCO_SetRecordingState(camHand,act_recState)
+			res4 = LIB.SetRecordingState(camHand,act_recState)
 			if res4():
-				print 'PCO_SetRecordingState failed'
+				print 'SetRecordingState failed'
 
 
 	def set_triggermode(self,camHand,triggerMode):
 		
 		act_recState = c_ushort(10)
-		res1 = LIB.PCO_GetRecordingState(camHand,byref(act_recState))
+		res1 = LIB.GetRecordingState(camHand,byref(act_recState))
 		if res1():
-			print 'PCO_GetRecordingState failed'
+			print 'GetRecordingState failed'
 	
 		if act_recState.value != 0:
-			res2 = LIB.PCO_SetRecordingState(camHand,0)
+			res2 = LIB.SetRecordingState(camHand,0)
 			print 'RecordingState set to 0'
 		
 		if triggerMode!=0 and triggerMode!=1 and triggerMode!=2 and triggerMode!=3:
 			print 'Trigger mode must be 0,1,2 or 3'
 		
 		act_triggerMode = c_ushort(10)
-		res2a = LIB.PCO_GetTriggerMode(camHand,byref(act_triggerMode))
+		res2a = LIB.GetTriggerMode(camHand,byref(act_triggerMode))
 		if res2a():
 			print 'PCO_GetTriggerMode failed with error '
 				
