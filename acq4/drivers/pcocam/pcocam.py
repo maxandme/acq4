@@ -181,7 +181,7 @@ class PCOCameraClass:
 
 		# Description of the camera
 		plist = LIB.Description(sizeof(LIB.Description),)
-		print "CAMERA DESCRIPTION : %s" % plist.wMaxBinVertDESC
+		
 		self.call(LIB.GetCameraDescription,self.cameraHandle,byref(plist))
 		# Get the Binning on the X and Y axis
 		#
