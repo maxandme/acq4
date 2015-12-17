@@ -136,25 +136,31 @@ class PCOCameraClass:
         print 'ACTUAL RESOLUTION : %s x %s' % (xresAct.value, yresAct.value)
         print 'MAXIMUM RESOLUTION : %s x %s' % (xresMax.value, yresMax.value)
         self.paramValues = {}   ## storage for local params and cache for remote params
-        ## remote params must be cached because reading them can cause
-        ## the camera to stop.
-        #self.paramValues = {  ## list of current values for parameters not handled by driver
-        #'binningX': 1,
-        #'binningY': 1,
-        #'exposure': 0.001,
-        #'framerate': 1,
-        #'pixelrate': 1,			
-        #'TriggerMode': 0,
-        #'triggerMode': 'Normal',
-        #'regionX': 0,
-        #'regionY': 0, 
-        #'ActualresX': size[0],
-        #'ActualresY': size[1],
-        #'MaxresX': size[2],
-        #'MaxresY': size[3],
-        #}
-        self.list_Params()
-        #self.set_Params()
+		
+        ## remote params must be cached because reading them can cause the camera to stop.
+        
+		self.paramValues = {  ## list of current values for parameters not handled by driver
+        'binningX': 1,
+        'binningY': 1,
+        'exposure': 0.001,
+        'framerate': 1,
+        'pixelrate': 1,			
+        'TriggerMode': 0,
+        'triggerMode': 'Normal',
+        'regionX': 0,
+        'regionY': 0, 
+        'ActualresX': size[0],
+        'ActualresY': size[1],
+        'MaxresX': size[2],
+        'MaxresY': size[3],
+		'ROI X0' : 0,
+		'ROI X0' : 0,
+		'ROI X0' : 1040,
+		'ROI X0' : 1342,
+        }
+        print self.paramValues.exposure # TEST D'AFFICHAGE DE LA LISTE
+		self.list_Params()
+        #self.set_Params(exposure,time_stamp,pixelrate,trigger_mode,hor_bin,vert_bin)
 
     def open(self):
         self.cameraHandle = c_void_p()
