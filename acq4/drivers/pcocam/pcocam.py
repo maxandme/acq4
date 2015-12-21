@@ -135,11 +135,11 @@ class PCOCameraClass:
         print 'GET SIZE ...'
         print 'ACTUAL RESOLUTION : %s x %s' % (xresAct.value, yresAct.value)
         print 'MAXIMUM RESOLUTION : %s x %s' % (xresMax.value, yresMax.value)
-        self.paramValues = {}   ## storage for local params and cache for remote params
+        #self.paramValues = {}   ## storage for local params and cache for remote params
         
         ## remote params must be cached because reading them can cause the camera to stop.
         
-        self.paramValues = {  ## list of current values for parameters not handled by driver
+        '''self.paramValues = {  ## list of current values for parameters not handled by driver
         'binningX': 1,
         'binningY': 1,
         'exposure': 0.001,
@@ -149,18 +149,35 @@ class PCOCameraClass:
         'triggerMode': 'Normal',
         'regionX': 0,
         'regionY': 0, 
-        'ActualresX': size[0],
-        'ActualresY': size[1],
-        'MaxresX': size[2],
-        'MaxresY': size[3],
+        'ActualresX': xresAct,
+        'ActualresY': yresAct,
+        'MaxresX': xresMax,
+        'MaxresY': yresMax,
         'ROI X0' : 0,
         'ROI X0' : 0,
         'ROI X0' : 1040,
         'ROI X0' : 1342,
         }
-        print self.paramValues.exposure # TEST D'AFFICHAGE DE LA LISTE
+        print self.paramValues.exposure # TEST D'AFFICHAGE DE LA LISTE'''
+        
+        #TEST DE SET PARAMS
+        
+        
+        #INIT VARIABLES
+        sensor_format = 'STANDARD' # STANDARD : 1392*1040 Max // EXTENDED : 600*800 Max
+        pixelrate = 24000000
+        hor_bin = 1
+        vert_bin = 1
+        ROI_X0 = 1
+        ROI_Y0 = 1
+        ROI_X1 = 1392
+        ROI_Y1 = 1040
+        #End of the declaration
+        
+        
         self.list_Params()
-        self.set_Params(self,exposure_time,time_stamp,pixelrate,trigger_mode,hor_bin,vert_bin)
+        self.set_Params(sensor_format, pixelrate, hor_bin, vert_bin, ROI_X0, ROI_Y0, ROI_X1, ROI_Y1)
+        self.list_Params()
 
     def open(self):
         self.cameraHandle = c_void_p()
@@ -182,9 +199,16 @@ class PCOCameraClass:
     
     def list_Params(self, params=None):
         sensor_format=""
-        print 'LIST...'
+        
+        print "---------------------------"
+        print ""
+        print "'LIST ...'"
+        print ""
+        print "---------------------------"
+        
+        
         #if params is None:
-        #   return self.paramValues.copy()
+        #return self.paramValues.copy()
         print 'Description of the camera'
         plist = LIB.Description(sizeof(LIB.Description),)
         self.call(LIB.GetCameraDescription,self.cameraHandle,byref(plist))
@@ -211,15 +235,56 @@ class PCOCameraClass:
         print "VERTICAL ROI Y0: %s" % slist.wRoiY0
         print "HORIZONTAL ROI X1: %s" % slist.wRoiX1
         print "VERTICAL ROI Y1: %s" % slist.wRoiY1
-        self.call(LIB.SetSensorStruct,self.cameraHandle,byref(slist))
+        print "---------------------------"
         print ""
+        print "End of 'LIST ...'"
+        print ""
+        print "---------------------------"        
     
-    def set_Params(self,exposure_time,time_stamp,pixelrate,trigger_mode,hor_bin,vert_bin):
-        print 'SET_PARAM..'
-        plist = LIB.Sensor(sizeof(LIB.Sensor),)
-        self.call(LIB.SetSensorStruct,self.cameraHandle,byref(plist))
-        # Get the Binning on the X and Y axis
-        setSensorFormat(HANDLE ph, WORD wSensor)
+    def set_Params(self, sensor_format, pixelrate, hor_bin, vert_bin, ROI_X0, ROI_Y0, ROI_X1, ROI_Y1):
+        #def set_Params(self,exposure_time,time_stamp,pixelrate,trigger_mode,hor_bin,vert_bin):
+        #def set_Params(self, sensor_format, pixelrate, hor_bin, vert_bin, ROI_X0, ROI_Y0, ROI_X1, ROI_Y1):
+        SENSOR = c_ushort(0)
+        PIXELRATE = long(pixelrate)
+        print "---------------------------"
+        print ""
+        print "'SET_PARAM..'"
+        print ""
+        print "---------------------------"
+        
+        slist = LIB.Sensor(sizeof(LIB.Sensor),)
+        self.call(LIB.GetSensorStruct,self.cameraHandle,byref(slist))
+        
+        #SETTING OF THE SENSOR FORMAT
+        
+        print 'sensor_format'
+        if sensor_format == "STANDARD" :
+            SENSOR = 0
+        elif sensor_format == "EXTENDED" :
+            SENSOR= 1
+        
+        self.call(LIB.SetSensorFormat,self.cameraHandle,SENSOR)
+        
+        
+        # SETTING OF THE Region Of Interrest (ROI)
+        print 'Region Of Interrest (ROI)'
+        self.call(LIB.SetROI,self.cameraHandle, ROI_X0, ROI_Y0, ROI_X1, ROI_Y1)
+        
+        #SETTING THE BINNING
+        print 'Binning'
+        self.call(LIB.SetBinning,self.cameraHandle, hor_bin, vert_bin )
+        
+        # SETTING OF THE PIXELRATE
+        print 'Pixelrate'
+        print pixelrate
+        print PIXELRATE
+        print slist.dwPixelRate
+        self.call(LIB.SetPixelrate, self.cameraHandle, PIXELRATE) 
+        print "---------------------------"
+        print ""
+        print "End of 'SET_PARAM..'"
+        print ""
+        print "---------------------------"
 
 
        
