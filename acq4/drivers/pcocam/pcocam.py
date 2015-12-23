@@ -245,7 +245,7 @@ class PCOCameraClass:
         #def set_Params(self,exposure_time,time_stamp,pixelrate,trigger_mode,hor_bin,vert_bin):
         #def set_Params(self, sensor_format, pixelrate, hor_bin, vert_bin, ROI_X0, ROI_Y0, ROI_X1, ROI_Y1):
         SENSOR = c_ushort(0)
-        PIXELRATE = long(pixelrate)
+        PIXELRATE = c_ulong(pixelrate)
         print "---------------------------"
         print ""
         print "'SET_PARAM..'"
@@ -256,7 +256,7 @@ class PCOCameraClass:
         self.call(LIB.GetSensorStruct,self.cameraHandle,byref(slist))
         
         #SETTING OF THE SENSOR FORMAT
-        
+        print ""
         print 'sensor_format'
         if sensor_format == "STANDARD" :
             SENSOR = 0
@@ -267,19 +267,23 @@ class PCOCameraClass:
         
         
         # SETTING OF THE Region Of Interrest (ROI)
+        print ""
         print 'Region Of Interrest (ROI)'
-        self.call(LIB.SetROI,self.cameraHandle, ROI_X0, ROI_Y0, ROI_X1, ROI_Y1)
+        self.call(LIB.SetROI,self.cameraHandle, ROI_X0, ROI_Y0, ROI_X1, ROI_Y1)
+
         
         #SETTING THE BINNING
+        print ""
         print 'Binning'
         self.call(LIB.SetBinning,self.cameraHandle, hor_bin, vert_bin )
         
         # SETTING OF THE PIXELRATE
+        print ""
         print 'Pixelrate'
         print pixelrate
-        print PIXELRATE
-        print slist.dwPixelRate
-        self.call(LIB.SetPixelrate, self.cameraHandle, PIXELRATE) 
+        #print PIXELRATE
+        #print slist.dwPixelRate
+        self.call(LIB.SetPixelRate, self.cameraHandle, PIXELRATE)
         print "---------------------------"
         print ""
         print "End of 'SET_PARAM..'"
